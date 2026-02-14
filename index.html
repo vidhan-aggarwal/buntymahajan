@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Be My Valentine 💘</title>
+
+<style>
+    body {
+        margin: 0;
+        height: 100vh;
+        background: linear-gradient(135deg, #ff9a9e, #fad0c4);
+        font-family: Poppins, sans-serif;
+        overflow: hidden;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .card {
+        background: #ffffffcc;
+        padding: 40px;
+        width: 420px;
+        border-radius: 20px;
+        text-align: center;
+        box-shadow: 0 0 25px rgba(255, 61, 103, 0.4);
+        z-index: 3;
+        position: relative;
+    }
+
+    .btn {
+        padding: 12px 28px;
+        margin: 15px;
+        border-radius: 30px;
+        font-size: 18px;
+        font-weight: 600;
+        border: none;
+        cursor: pointer;
+    }
+
+    #yesBtn {
+        background: #ff2e63;
+        color: white;
+    }
+
+    #noBtn {
+        background: #6c757d;
+        color: white;
+        position: absolute;
+        left: 50vw;
+        top: 70vh;
+        transform: translate(-50%, -50%);
+        padding: 12px 28px;
+        border-radius: 30px;
+        font-size: 18px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: left 0.15s ease-out, top 0.15s ease-out; /* smoother */
+        z-index: 3;
+    }
+
+    .falling-heart {
+        position: fixed;
+        top: -10px;
+        font-size: 25px;
+        color: #ff2e63;
+        animation: fall linear forwards;
+        pointer-events: none;
+        z-index: 1;
+    }
+
+    @keyframes fall {
+        0% { transform: translateY(0) rotate(0deg); opacity: 1; }
+        100% { transform: translateY(110vh) rotate(360deg); opacity: 0; }
+    }
+
+    .cursor-heart {
+        position: fixed;
+        pointer-events: none;
+        color: #ff2e63;
+        animation: floatUp 1.2s ease-out forwards;
+        z-index: 2;
+    }
+
+    @keyframes floatUp {
+        0% { opacity: 1; transform: translateY(0) scale(1); }
+        100% { opacity: 0; transform: translateY(-80px) scale(0.2); }
+    }
+</style>
+</head>
+
+<body>
+
+<div class="card" id="mainCard">
+    <h1>Will you be my Valentine? 💘</h1>
+    <button class="btn" id="yesBtn" onclick="sayYes()">Yes 💖</button>
+</div>
+
+<button id="noBtn">No 😢</button>
+
+<script>
+let heartsEnabled = false;
+
+const noBtn = document.getElementById("noBtn");
+noBtn.style.transform = "none";
+
+/* REMOVE TRANSITION FOR TRUE SMOOTHNESS */
+noBtn.style.transition = "none";
+
+/* Store position */
+let currentX = window.innerWidth / 2;
+let currentY = window.innerHeight * 0.7;
+
+let targetX = currentX;
+let targetY = currentY;
+
+const move = 200;
+const repelRadius = 150;
+const ease = 0.08; // smaller = smoother
+
+/* Track mouse */
+let mouseX = 0;
+let mouseY = 0;
+
+document.addEventListener("mousemove", (e) => {
+    mouseX = e.clientX;
+    mouseY = e.clientY;
+
+    if (heartsEnabled) createCursorHeart(mouseX, mouseY);
+});
+
+/* Smooth animation loop */
+function animate() {
+    const rect = noBtn.getBoundingClientRect();
+    const btnX = currentX + rect.width / 2;
+    const btnY = currentY + rect.height / 2;
+
+    const dx = btnX - mouseX;
+    const dy = btnY - mouseY;
+    const distance = Math.sqrt(dx * dx + dy * dy);
+
+    if (distance < repelRadius) {
+        const angle = Math.atan2(dy, dx);
+        const strength = (repelRadius - distance) / repelRadius;
+
+        targetX = currentX + Math.cos(angle) * move * strength;
+        targetY = currentY + Math.sin(angle) * move * strength;
+
+        targetX = Math.max(0, Math.min(window.innerWidth - rect.width, targetX));
+        targetY = Math.max(0, Math.min(window.innerHeight - rect.height, targetY));
+    }
+
+    /* Smooth easing toward target */
+    currentX += (targetX - currentX) * ease;
+    currentY += (targetY - currentY) * ease;
+
+    noBtn.style.left = currentX + "px";
+    noBtn.style.top  = currentY + "px";
+
+    requestAnimationFrame(animate);
+}
+
+animate();
+
+/* Cursor hearts */
+function createCursorHeart(x, y) {
+    const heart = document.createElement("div");
+    heart.classList.add("cursor-heart");
+    heart.innerHTML = "💖";
+
+    heart.style.left = x + "px";
+    heart.style.top = y + "px";
+    heart.style.fontSize = (18 + Math.random() * 26) + "px";
+
+    document.body.appendChild(heart);
+    setTimeout(() => heart.remove(), 1200);
+}
+
+/* Falling hearts */
+function startFallingHearts() {
+    setInterval(() => {
+        const heart = document.createElement("div");
+        heart.classList.add("falling-heart");
+        heart.innerHTML = "💖";
+
+        heart.style.left = Math.random() * 100 + "vw";
+        heart.style.fontSize = (20 + Math.random() * 30) + "px";
+
+        const duration = 3 + Math.random() * 3;
+        heart.style.animationDuration = duration + "s";
+
+        document.body.appendChild(heart);
+        setTimeout(() => heart.remove(), duration * 1000);
+    }, 200);
+}
+
+function sayYes() {
+    noBtn.style.display = "none";
+
+    document.getElementById("mainCard").innerHTML = `
+        <h1>YAY! 💗</h1>
+        <p style="color:#ff2e63; font-size:22px; font-weight:600;">
+            I knew you'd say YES! 😘💞
+        </p>`;
+
+    heartsEnabled = true;
+    startFallingHearts();
+}
+</script>
+
+
+</body>
+</html>
